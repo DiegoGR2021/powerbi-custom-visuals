@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  powerbi-dev:
+    build: .
+    container_name: powerbi-custom-visuals
+    ports:
+      - "8080:8080"  # Power BI development server
+      - "8888:8888"  # Jupyter notebook
+    volumes:
+      - .:/app
+      - /app/node_modules  # Preserve node_modules in container
+    environment:
+      - NODE_ENV=development
+      - PYTHONPATH=/app
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    command: /app/start.sh
+
+  # Optional: Add a database service for data storage
+  postgres:
+    image: postgres:15
+    container_name: powerbi-postgres
+    environment:
+      POSTGRES_DB: powerbi_data
+      POSTGRES_USER: powerbi_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-powerbi_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    profiles:
+      - database
+
+volumes:
+  postgres_data: 
